@@ -138,7 +138,7 @@ export default function LoudinkStore() {
     .product-card:hover { border-color: var(--red); transform: translateY(-4px); box-shadow: 0 8px 32px rgba(204,34,0,0.15); }
     .size-btn {
       padding: 8px 14px; border: 1px solid var(--border);
-      background: transparent; color: var(--muted); cursor: pointer;
+      background: #1a1a1a; color: #e8e0d0; cursor: pointer;
       font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px;
       font-size: 13px; transition: all 0.2s;
     }
@@ -329,7 +329,7 @@ export default function LoudinkStore() {
       <div style={{maxWidth:1100,margin:"0 auto",padding:"60px 24px"}}>
         <button className="btn-outline" onClick={() => setPage("shop")}
           style={{marginBottom:40,fontSize:11}}>← Voltar à Loja</button>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:64}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 400px), 1fr))",gap:32}}>
           <div>
             <div style={{background:"#111",border:"1px solid #1a1a1a",padding:40,
               position:"relative",overflow:"hidden"}}>
