@@ -87,26 +87,43 @@ export default function LoudinkStore() {
   const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
 
-  const placeOrder = async () => {
-    const orderNumber = "LDK-" + Date.now().toString().slice(-6);
-    const { error } = await supabase.from("orders").insert({
-      order_number: orderNumber,
-      customer_name: orderData.name,
-      customer_email: orderData.email,
-      customer_phone: orderData.phone,
-      shipping_address: orderData.address,
-      shipping_city: orderData.city,
-      shipping_zip: orderData.zip,
-      items: cart,
-      total: total,
-      status: "pending",
-      payment_status: "awaiting"
+ const placeOrder = async () => {
+  const orderNumber = "LDK-" + Date.now().toString().slice(-6);
+  const { error } = await supabase.from("orders").insert({
+    order_number: orderNumber,
+    customer_name: orderData.name,
+    customer_email: orderData.email,
+    customer_phone: orderData.phone,
+    shipping_address: orderData.address,
+    shipping_city: orderData.city,
+    shipping_zip: orderData.zip,
+    items: cart,
+    total: total,
+    status: "pending",
+    payment_status: "awaiting"
+  });
+
+  if (!error) {
+    await fetch('/api/send-order-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderNumber,
+        customerName: orderData.name,
+        customerEmail: orderData.email,
+        customerPhone: orderData.phone,
+        shippingAddress: orderData.address,
+        shippingCity: orderData.city,
+        shippingZip: orderData.zip,
+        items: cart,
+        total
+      })
     });
-    if (!error) {
-      setOrderPlaced(true);
-      setCheckoutStep(3);
-    }
-  };
+
+    setOrderPlaced(true);
+    setCheckoutStep(3);
+  }
+};
 
   const css = `
     @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Special+Elite&family=Barlow+Condensed:wght@300;400;600&display=swap');
@@ -115,7 +132,7 @@ export default function LoudinkStore() {
     :root {
       --bg: #0a0a0a; --bg2: #111; --bg3: #161616;
       --red: #cc2200; --gold: #c9a84c;
-      --text: #e8e0d0; --muted: #666; --border: #2a2a2a;
+      --text: #e8e0d0; --muted: #aaa;npm install resend --border: #2a2a2a;
     }
     .btn-primary {
       background: var(--red); color: #fff; border: none; cursor: pointer;
@@ -125,7 +142,7 @@ export default function LoudinkStore() {
     }
     .btn-primary:hover { background: #e02800; transform: translateY(-1px); }
     .btn-outline {
-      background: transparent; color: var(--text); border: 1px solid var(--border);
+      background: transparent; color: var(--text); --muted: #aaa;
       cursor: pointer; font-family: 'Barlow Condensed', sans-serif;
       letter-spacing: 2px; text-transform: uppercase;
       transition: all 0.2s; padding: 10px 20px; font-size: 12px;
