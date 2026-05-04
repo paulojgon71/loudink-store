@@ -44,6 +44,7 @@ export default function LoudinkStore() {
   const [page, setPage] = useState("home");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [products, setProducts] = useState([]);
@@ -73,12 +74,12 @@ export default function LoudinkStore() {
   const styles = ["All", ...new Set(products.map(p => p.style))];
   const filtered = filterStyle === "All" ? products : products.filter(p => p.style === filterStyle);
 
-  const addToCart = (product, size) => {
-    const existing = cart.find(i => i.id === product.id && i.size === size);
+  const addToCart = (product, size, color) => {
+    const existing = cart.find(i => i.id === product.id && i.size === size && i.color === color);
     if (existing) {
-      setCart(cart.map(i => i.id === product.id && i.size === size ? {...i, qty: i.qty + 1} : i));
+      setCart(cart.map(i => i.id === product.id && i.size === size && i.color === color ? {...i, qty: i.qty + 1} : i));
     } else {
-      setCart([...cart, {...product, size, qty: 1}]);
+      setCart([...cart, {...product, size, color, qty: 1}]);
     }
     setCartOpen(true);
   };
@@ -87,43 +88,42 @@ export default function LoudinkStore() {
   const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
 
- const placeOrder = async () => {
-  const orderNumber = "LDK-" + Date.now().toString().slice(-6);
-  const { error } = await supabase.from("orders").insert({
-    order_number: orderNumber,
-    customer_name: orderData.name,
-    customer_email: orderData.email,
-    customer_phone: orderData.phone,
-    shipping_address: orderData.address,
-    shipping_city: orderData.city,
-    shipping_zip: orderData.zip,
-    items: cart,
-    total: total,
-    status: "pending",
-    payment_status: "awaiting"
-  });
-
-  if (!error) {
-    await fetch('/api/send-order-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        orderNumber,
-        customerName: orderData.name,
-        customerEmail: orderData.email,
-        customerPhone: orderData.phone,
-        shippingAddress: orderData.address,
-        shippingCity: orderData.city,
-        shippingZip: orderData.zip,
-        items: cart,
-        total
-      })
+  const placeOrder = async () => {
+    const orderNumber = "LDK-" + Date.now().toString().slice(-6);
+    const { error } = await supabase.from("orders").insert({
+      order_number: orderNumber,
+      customer_name: orderData.name,
+      customer_email: orderData.email,
+      customer_phone: orderData.phone,
+      shipping_address: orderData.address,
+      shipping_city: orderData.city,
+      shipping_zip: orderData.zip,
+      items: cart,
+      total: total,
+      status: "pending",
+      payment_status: "awaiting"
     });
 
-    setOrderPlaced(true);
-    setCheckoutStep(3);
-  }
-};
+    if (!error) {
+      await fetch('/api/send-order-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderNumber,
+          customerName: orderData.name,
+          customerEmail: orderData.email,
+          customerPhone: orderData.phone,
+          shippingAddress: orderData.address,
+          shippingCity: orderData.city,
+          shippingZip: orderData.zip,
+          items: cart,
+          total
+        })
+      });
+      setOrderPlaced(true);
+      setCheckoutStep(3);
+    }
+  };
 
   const css = `
     @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Special+Elite&family=Barlow+Condensed:wght@300;400;600&display=swap');
@@ -132,7 +132,7 @@ export default function LoudinkStore() {
     :root {
       --bg: #0a0a0a; --bg2: #111; --bg3: #161616;
       --red: #cc2200; --gold: #c9a84c;
-      --text: #e8e0d0; --muted: #aaa;npm install resend --border: #2a2a2a;
+      --text: #e8e0d0; --muted: #aaa; --border: #2a2a2a;
     }
     .btn-primary {
       background: var(--red); color: #fff; border: none; cursor: pointer;
@@ -142,7 +142,7 @@ export default function LoudinkStore() {
     }
     .btn-primary:hover { background: #e02800; transform: translateY(-1px); }
     .btn-outline {
-      background: transparent; color: var(--text); --muted: #aaa;
+      background: transparent; color: var(--text); border: 1px solid var(--border);
       cursor: pointer; font-family: 'Barlow Condensed', sans-serif;
       letter-spacing: 2px; text-transform: uppercase;
       transition: all 0.2s; padding: 10px 20px; font-size: 12px;
@@ -249,7 +249,7 @@ export default function LoudinkStore() {
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:2}}>
           {products.slice(0,4).map(p => (
             <div key={p.id} className="product-card"
-              onClick={() => { setSelectedProduct(p); setSelectedSize(""); setPage("product"); }}>
+              onClick={() => { setSelectedProduct(p); setSelectedSize(""); setSelectedColor(""); setPage("product"); }}>
               <TshirtIcon accentColor={p.accent_color} imageUrl={p.image_url} bandName={p.band}/>
               <div style={{padding:"16px 20px"}}>
                 <div style={{fontFamily:"'Oswald',sans-serif",fontWeight:700,fontSize:18,
@@ -315,7 +315,7 @@ export default function LoudinkStore() {
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:2}}>
           {filtered.map(p => (
             <div key={p.id} className="product-card"
-              onClick={() => { setSelectedProduct(p); setSelectedSize(""); setPage("product"); }}>
+              onClick={() => { setSelectedProduct(p); setSelectedSize(""); setSelectedColor(""); setPage("product"); }}>
               <TshirtIcon accentColor={p.accent_color} imageUrl={p.image_url} bandName={p.band}/>
               <div style={{padding:"20px 24px"}}>
                 <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:10,letterSpacing:3,
@@ -342,6 +342,9 @@ export default function LoudinkStore() {
     const p = selectedProduct;
     if (!p) return null;
     const sizes = Array.isArray(p.sizes) ? p.sizes : ["S","M","L","XL","XXL"];
+    const colors = Array.isArray(p.colors) ? p.colors : ["black"];
+    const colorMap = { black:"#1a1a1a", white:"#f0f0f0", grey:"#666666", navy:"#1a2744", bordeaux:"#5c1a1a" };
+    const colorLabels = { black:"Preto", white:"Branco", grey:"Cinzento", navy:"Azul Navy", bordeaux:"Bordeaux" };
     return (
       <div style={{maxWidth:1100,margin:"0 auto",padding:"60px 24px"}}>
         <button className="btn-outline" onClick={() => setPage("shop")}
@@ -376,11 +379,28 @@ export default function LoudinkStore() {
                 ))}
               </div>
             </div>
+            <div style={{marginBottom:32}}>
+              <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,letterSpacing:3,
+                color:"#555",textTransform:"uppercase",marginBottom:12}}>
+                Cor {selectedColor && `— ${colorLabels[selectedColor]}`}</div>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                {colors.map(c => (
+                  <button key={c} onClick={() => setSelectedColor(c)} style={{
+                    width:32, height:32, borderRadius:"50%",
+                    background: colorMap[c],
+                    border: selectedColor===c ? "2px solid #cc2200" : "2px solid #333",
+                    cursor:"pointer", transition:"all 0.2s",
+                    boxShadow: selectedColor===c ? "0 0 0 2px #cc2200" : "none"
+                  }} title={colorLabels[c]}/>
+                ))}
+              </div>
+            </div>
             <button className="btn-primary"
               style={{width:"100%",padding:18,fontSize:14,letterSpacing:3,
-                opacity:selectedSize?1:0.4,cursor:selectedSize?"pointer":"not-allowed"}}
-              onClick={() => { if(selectedSize) addToCart(p, selectedSize); }}>
-              {selectedSize ? "Adicionar ao Carrinho" : "Seleciona um Tamanho"}
+                opacity:(selectedSize && selectedColor)?1:0.4,
+                cursor:(selectedSize && selectedColor)?"pointer":"not-allowed"}}
+              onClick={() => { if(selectedSize && selectedColor) addToCart(p, selectedSize, selectedColor); }}>
+              {!selectedSize ? "Seleciona um Tamanho" : !selectedColor ? "Seleciona uma Cor" : "Adicionar ao Carrinho"}
             </button>
             <div style={{marginTop:32,padding:20,background:"#0d0d0d",border:"1px solid #1a1a1a"}}>
               {[["Material","100% algodão 180g"],["Impressão","DTF — durável e lavável"],
@@ -415,7 +435,7 @@ export default function LoudinkStore() {
             <div style={{textAlign:"center",padding:"60px 0",fontFamily:"'Barlow Condensed',sans-serif",
               color:"#444",letterSpacing:2,fontSize:13,textTransform:"uppercase"}}>Carrinho vazio</div>
           ) : cart.map(item => (
-            <div key={`${item.id}-${item.size}`} style={{display:"flex",gap:16,padding:"16px 0",
+            <div key={`${item.id}-${item.size}-${item.color}`} style={{display:"flex",gap:16,padding:"16px 0",
               borderBottom:"1px solid #1a1a1a",alignItems:"center"}}>
               <div style={{width:60,height:60,background:"#161616",
                 border:`1px solid ${item.accent_color}33`,flexShrink:0,
@@ -424,7 +444,7 @@ export default function LoudinkStore() {
                 <div style={{fontFamily:"'Oswald',sans-serif",fontWeight:600,fontSize:16,
                   color:"#e8e0d0",fontStyle:"italic"}}>{item.band}</div>
                 <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,
-                  color:"#555",letterSpacing:1}}>Tamanho {item.size} · Qty {item.qty}</div>
+                  color:"#555",letterSpacing:1}}>Tam. {item.size} · {item.color} · Qty {item.qty}</div>
               </div>
               <div style={{textAlign:"right"}}>
                 <div style={{fontFamily:"'Oswald',sans-serif",fontSize:16,
@@ -493,9 +513,9 @@ export default function LoudinkStore() {
           <h2 style={{fontFamily:"'Oswald',sans-serif",fontWeight:700,fontSize:32,
             color:"#e8e0d0",fontStyle:"italic",marginBottom:32}}>Confirmar Encomenda</h2>
           {cart.map(item => (
-            <div key={`${item.id}-${item.size}`} style={{display:"flex",justifyContent:"space-between",
+            <div key={`${item.id}-${item.size}-${item.color}`} style={{display:"flex",justifyContent:"space-between",
               padding:"16px 0",borderBottom:"1px solid #1a1a1a",fontFamily:"'Barlow Condensed',sans-serif"}}>
-              <span style={{color:"#e8e0d0",fontSize:16}}>{item.band} — Tam. {item.size} × {item.qty}</span>
+              <span style={{color:"#e8e0d0",fontSize:16}}>{item.band} — Tam. {item.size} · {item.color} × {item.qty}</span>
               <span style={{color:"#e8e0d0",fontSize:16}}>€{(item.price*item.qty).toFixed(2)}</span>
             </div>
           ))}
@@ -553,7 +573,7 @@ export default function LoudinkStore() {
       {page==="home" && <HomePage/>}
       {page==="shop" && <ShopPage/>}
       {page==="product" && <ProductPage/>}
-      {page==="checkout" && <CheckoutPage/>}
+      {page==="checkout" && CheckoutPage()}
       <CartSidebar/>
       <Footer/>
     </div>
