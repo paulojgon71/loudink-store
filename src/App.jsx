@@ -574,6 +574,10 @@ export default function LoudinkStore() {
       {page==="shop" && <ShopPage/>}
       {page==="product" && <ProductPage/>}
       {page==="checkout" && CheckoutPage()}
+<<<<<<< HEAD
+=======
+
+>>>>>>> 698420679d24985b320a9d7ef7063745ed9f1786
       <CartSidebar/>
       <Footer/>
     </div>
