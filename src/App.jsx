@@ -50,6 +50,7 @@ export default function LoudinkStore() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStyle, setFilterStyle] = useState("All");
+  const [filterCollection, setFilterCollection] = useState("All");
   const [checkoutStep, setCheckoutStep] = useState(1);
   const [orderData, setOrderData] = useState({
     name: "", email: "", phone: "", address: "", city: "", zip: ""
@@ -72,7 +73,11 @@ export default function LoudinkStore() {
   };
 
   const styles = ["All", ...new Set(products.map(p => p.style))];
-  const filtered = filterStyle === "All" ? products : products.filter(p => p.style === filterStyle);
+  const filtered = products.filter(p => {
+    const matchCollection = filterCollection === "All" || p.collection === filterCollection;
+    const matchStyle = filterStyle === "All" || p.style === filterStyle;
+    return matchCollection && matchStyle;
+  });
 
   const addToCart = (product, size, color) => {
     const existing = cart.find(i => i.id === product.id && i.size === size && i.color === color);
@@ -161,6 +166,12 @@ export default function LoudinkStore() {
     }
     .size-btn:hover { border-color: var(--text); color: var(--text); }
     .size-btn.active { border-color: var(--red); color: var(--red); background: rgba(204,34,0,0.1); }
+    .collection-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      cursor: pointer; transition: all 0.3s; overflow: hidden;
+      position: relative;
+    }
+    .collection-card:hover { border-color: var(--red); transform: translateY(-4px); box-shadow: 0 8px 32px rgba(204,34,0,0.2); }
     input { width: 100%; padding: 12px 16px; background: var(--bg3); border: 1px solid var(--border);
       color: var(--text); font-family: 'Barlow Condensed', sans-serif;
       font-size: 14px; letter-spacing: 0.5px; outline: none; transition: border-color 0.2s; }
@@ -183,7 +194,7 @@ export default function LoudinkStore() {
         <span style={{fontFamily:"'Oswald',sans-serif",fontWeight:700,fontSize:26,letterSpacing:-1,color:"#cc2200",fontStyle:"italic"}}>INK</span>
       </div>
       <nav style={{display:"flex", gap:32, alignItems:"center"}}>
-        {[["home","Início"],["shop","Loja"]].map(([p,l]) => (
+        {[["home","Início"],["collections","Coleções"],["shop","Loja"]].map(([p,l]) => (
           <span key={p} onClick={() => setPage(p)} style={{
             fontFamily:"'Barlow Condensed',sans-serif", fontSize:13, letterSpacing:3,
             textTransform:"uppercase", color: page===p ? "#cc2200" : "#888", cursor:"pointer"
@@ -203,6 +214,53 @@ export default function LoudinkStore() {
         )}
       </button>
     </header>
+  );
+
+  const collectionsData = [
+    { name: "Todas", value: "All", description: "39 designs · Todas as coleções", color: "#cc2200", emoji: "🔥" },
+    { name: "Metal & Rock", value: "Metal & Rock", description: "19 designs · Heavy metal, gothic, doom", color: "#cc2200", emoji: "🤘" },
+    { name: "Surf & Skate", value: "Surf & Skate", description: "10 designs · California vibes", color: "#00897B", emoji: "🏄" },
+    { name: "Americana", value: "Americana", description: "10 designs · Route 66, muscle cars", color: "#8B4513", emoji: "🇺🇸" },
+  ];
+
+  const CollectionsPage = () => (
+    <div style={{maxWidth:1100,margin:"0 auto",padding:"80px 24px"}}>
+      <div style={{marginBottom:64,textAlign:"center"}}>
+        <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,letterSpacing:8,
+          color:"#cc2200",textTransform:"uppercase",marginBottom:16}}>Loudink</div>
+        <h1 style={{fontFamily:"'Oswald',sans-serif",fontWeight:700,fontSize:64,
+          color:"#e8e0d0",fontStyle:"italic",lineHeight:0.9,marginBottom:16}}>Coleções</h1>
+        <p style={{fontFamily:"'Special Elite',serif",fontSize:16,color:"#555",letterSpacing:2}}>
+          Fictional Legends. Real Style.
+        </p>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:2}}>
+        {collectionsData.map(col => (
+          <div key={col.value} className="collection-card"
+            onClick={() => {
+              setFilterCollection(col.value);
+              setFilterStyle("All");
+              setPage("shop");
+            }}>
+            <div style={{
+              height:200, display:"flex", alignItems:"center", justifyContent:"center",
+              background:`linear-gradient(135deg, #0d0d0d 0%, ${col.color}22 100%)`,
+              borderBottom:`1px solid ${col.color}44`, fontSize:80
+            }}>
+              {col.emoji}
+            </div>
+            <div style={{padding:"24px 28px"}}>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontWeight:700,fontSize:28,
+                color:"#e8e0d0",fontStyle:"italic",marginBottom:8}}>{col.name}</div>
+              <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,
+                color:"#555",letterSpacing:2,textTransform:"uppercase",marginBottom:16}}>{col.description}</div>
+              <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,
+                color:col.color,letterSpacing:3,textTransform:"uppercase"}}>Ver Coleção →</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 
   const HomePage = () => (
@@ -227,9 +285,9 @@ export default function LoudinkStore() {
           <div style={{fontFamily:"'Special Elite',serif",fontSize:"clamp(14px,3vw,18px)",
             color:"#666",letterSpacing:4,marginBottom:48,textTransform:"uppercase"}}>Wear The Noise</div>
           <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
-            <button className="btn-primary" onClick={() => setPage("shop")}
+            <button className="btn-primary" onClick={() => setPage("collections")}
               style={{fontSize:14,padding:"16px 40px",letterSpacing:3}}>Ver Coleção</button>
-            <button className="btn-outline" onClick={() => setPage("shop")}>
+            <button className="btn-outline" onClick={() => { setFilterCollection("All"); setPage("shop"); }}>
               {products.length} Designs Disponíveis
             </button>
           </div>
@@ -242,9 +300,9 @@ export default function LoudinkStore() {
             <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,letterSpacing:6,
               color:"#cc2200",textTransform:"uppercase",marginBottom:8}}>Destaques</div>
             <h2 style={{fontFamily:"'Oswald',sans-serif",fontWeight:700,fontSize:42,
-              color:"#e8e0d0",fontStyle:"italic"}}>Bandas Fictícias.<br/>Qualidade Real.</h2>
+              color:"#e8e0d0",fontStyle:"italic"}}>Fictional Legends.<br/>Real Style.</h2>
           </div>
-          <button className="btn-outline" onClick={() => setPage("shop")}>Ver Tudo →</button>
+          <button className="btn-outline" onClick={() => setPage("collections")}>Ver Coleções →</button>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:2}}>
           {products.slice(0,4).map(p => (
@@ -272,7 +330,7 @@ export default function LoudinkStore() {
           gap:40,textAlign:"center"}}>
           {[["🖨️","Impressão DTF","Alta qualidade em tecido"],
             ["📦","Envio Portugal","CTT Expresso 2-3 dias"],
-            ["🎨","Design Original","20 bandas fictícias únicas"],
+            ["🎨","Design Original","39 designs fictícios únicos"],
             ["💳","Pagamento MB Way","Rápido e seguro"]].map(([icon,title,sub]) => (
             <div key={title}>
               <div style={{fontSize:28,marginBottom:8}}>{icon}</div>
@@ -291,7 +349,9 @@ export default function LoudinkStore() {
     <div style={{maxWidth:1300,margin:"0 auto",padding:"60px 24px"}}>
       <div style={{marginBottom:48}}>
         <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,letterSpacing:6,
-          color:"#cc2200",textTransform:"uppercase",marginBottom:8}}>Todos os Designs</div>
+          color:"#cc2200",textTransform:"uppercase",marginBottom:8}}>
+          {filterCollection === "All" ? "Todos os Designs" : filterCollection}
+        </div>
         <h1 style={{fontFamily:"'Oswald',sans-serif",fontWeight:700,fontSize:52,
           color:"#e8e0d0",fontStyle:"italic"}}>A Coleção</h1>
       </div>
@@ -571,6 +631,7 @@ export default function LoudinkStore() {
       <GrainOverlay/>
       <Header/>
       {page==="home" && <HomePage/>}
+      {page==="collections" && <CollectionsPage/>}
       {page==="shop" && <ShopPage/>}
       {page==="product" && <ProductPage/>}
       {page==="checkout" && CheckoutPage()}
