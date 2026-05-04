@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   try {
     // Email para ti (notificação)
     await resend.emails.send({
-      from: 'Loudink <onboarding@resend.dev>',
+      from: 'Loudink <noreply@loudink.ink>',
       to: 'paulojgon71@gmail.com',
       subject: `Nova encomenda ${orderNumber}`,
       html: `
