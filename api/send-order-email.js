@@ -47,7 +47,7 @@ export default async function handler(req, res) {
 
     // Email para o cliente (confirmação)
     await resend.emails.send({
-      from: 'Loudink <onboarding@resend.dev>',
+      from: 'Loudink <noreply@loudink.ink>',
       to: customerEmail,
       subject: `Confirmação de encomenda ${orderNumber}`,
       html: `
