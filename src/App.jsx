@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import PopupDiscount from './PopupDiscount';
 import { supabase } from "./supabase";
 
 const GrainOverlay = () => (
@@ -628,7 +629,8 @@ export default function LoudinkStore() {
   return (
     <div style={{background:"#0a0a0a",minHeight:"100vh",color:"#e8e0d0"}}>
       <style>{css}</style>
-      <GrainOverlay/>
+      <GrainOverlay />
+      <PopupDiscount />   ← adiciona aqui
       <Header/>
       {page==="home" && <HomePage/>}
       {page==="collections" && <CollectionsPage/>}
