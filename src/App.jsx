@@ -57,6 +57,9 @@ export default function LoudinkStore() {
     name: "", email: "", phone: "", address: "", city: "", zip: ""
   });
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [discountCode, setDiscountCode] = useState("");
+  const [discount, setDiscount] = useState(0);
+  const [discountMsg, setDiscountMsg] = useState("");
 
   useEffect(() => {
     fetchProducts();
@@ -92,7 +95,18 @@ export default function LoudinkStore() {
 
   const removeFromCart = (id, size) => setCart(cart.filter(i => !(i.id === id && i.size === size)));
   const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const totalWithDiscount = total - (total * discount / 100);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
+
+  const applyDiscount = () => {
+    if (discountCode.toUpperCase() === "WELCOME10") {
+      setDiscount(10);
+      setDiscountMsg("✓ Código válido — 10% de desconto aplicado");
+    } else {
+      setDiscount(0);
+      setDiscountMsg("✗ Código inválido");
+    }
+  };
 
   const placeOrder = async () => {
     const orderNumber = "LDK-" + Date.now().toString().slice(-6);
@@ -105,7 +119,7 @@ export default function LoudinkStore() {
       shipping_city: orderData.city,
       shipping_zip: orderData.zip,
       items: cart,
-      total: total,
+      total: totalWithDiscount,
       status: "pending",
       payment_status: "awaiting"
     });
@@ -123,7 +137,7 @@ export default function LoudinkStore() {
           shippingCity: orderData.city,
           shippingZip: orderData.zip,
           items: cart,
-          total
+          total: totalWithDiscount
         })
       });
       setOrderPlaced(true);
@@ -564,6 +578,39 @@ export default function LoudinkStore() {
               </div>
             ))}
           </div>
+
+          {/* Campo de código de desconto */}
+          <div style={{marginTop:32,padding:24,background:"#0d0d0d",border:"1px solid #1a1a1a"}}>
+            <label style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,
+              letterSpacing:2,color:"#555",textTransform:"uppercase",display:"block",marginBottom:12}}>
+              Código de Desconto
+            </label>
+            <div style={{display:"flex",gap:8}}>
+              <input
+                value={discountCode}
+                onChange={e => setDiscountCode(e.target.value.toUpperCase())}
+                placeholder="Ex: WELCOME10"
+                style={{flex:1}}
+              />
+              <button
+                onClick={applyDiscount}
+                className="btn-outline"
+                style={{whiteSpace:"nowrap",padding:"12px 20px"}}
+              >
+                Aplicar
+              </button>
+            </div>
+            {discountMsg && (
+              <p style={{
+                fontFamily:"'Barlow Condensed',sans-serif",
+                fontSize:13,
+                marginTop:10,
+                color: discount > 0 ? "#4caf50" : "#cc2200",
+                letterSpacing:1
+              }}>{discountMsg}</p>
+            )}
+          </div>
+
           <button className="btn-primary" style={{marginTop:32,padding:"16px 40px"}}
             onClick={() => setCheckoutStep(2)}>Continuar →</button>
         </div>
@@ -580,9 +627,28 @@ export default function LoudinkStore() {
               <span style={{color:"#e8e0d0",fontSize:16}}>€{(item.price*item.qty).toFixed(2)}</span>
             </div>
           ))}
+
+          {/* Resumo de desconto */}
+          <div style={{padding:"16px 0",borderBottom:"1px solid #1a1a1a"}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:8,
+              fontFamily:"'Barlow Condensed',sans-serif"}}>
+              <span style={{color:"#666",fontSize:14,letterSpacing:1}}>Subtotal</span>
+              <span style={{color:"#e8e0d0",fontSize:14}}>€{total.toFixed(2)}</span>
+            </div>
+            {discount > 0 && (
+              <div style={{display:"flex",justifyContent:"space-between",
+                fontFamily:"'Barlow Condensed',sans-serif"}}>
+                <span style={{color:"#4caf50",fontSize:14,letterSpacing:1}}>Desconto ({discount}%)</span>
+                <span style={{color:"#4caf50",fontSize:14}}>-€{(total * discount / 100).toFixed(2)}</span>
+              </div>
+            )}
+          </div>
+
           <div style={{display:"flex",justifyContent:"space-between",padding:"20px 0",marginBottom:32}}>
             <span style={{fontFamily:"'Oswald',sans-serif",fontSize:22,color:"#e8e0d0",fontStyle:"italic"}}>Total</span>
-            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:28,color:"#e8e0d0",fontWeight:700}}>€{total.toFixed(2)}</span>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:28,color:"#e8e0d0",fontWeight:700}}>
+              €{totalWithDiscount.toFixed(2)}
+            </span>
           </div>
           <div style={{display:"flex",gap:16}}>
             <button className="btn-outline" onClick={() => setCheckoutStep(1)}>← Voltar</button>
@@ -630,7 +696,7 @@ export default function LoudinkStore() {
     <div style={{background:"#0a0a0a",minHeight:"100vh",color:"#e8e0d0"}}>
       <style>{css}</style>
       <GrainOverlay />
-      <PopupDiscount />   ← adiciona aqui
+      <PopupDiscount />
       <Header/>
       {page==="home" && <HomePage/>}
       {page==="collections" && <CollectionsPage/>}
