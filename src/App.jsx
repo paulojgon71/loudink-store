@@ -236,6 +236,7 @@ export default function LoudinkStore() {
     { name: "Metal & Rock", value: "Metal & Rock", description: "19 designs · Heavy metal, gothic, doom", color: "#cc2200", emoji: "🤘" },
     { name: "Surf & Skate", value: "Surf & Skate", description: "10 designs · California vibes", color: "#00897B", emoji: "🏄" },
     { name: "Americana", value: "Americana", description: "10 designs · Route 66, muscle cars", color: "#8B4513", emoji: "🇺🇸" },
+    { name: "Sci-Fi & Cult", value: "Sci-Fi & Cult", description: "10 designs · B-movies, space opera, cult cinema", color: "#6a0dad", emoji: "🚀" },
   ];
 
   const CollectionsPage = () => (
