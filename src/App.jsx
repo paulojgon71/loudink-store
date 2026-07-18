@@ -232,12 +232,13 @@ export default function LoudinkStore() {
   );
 
   const collectionsData = [
-    { name: "Todas", value: "All", description: "39 designs · Todas as coleções", color: "#cc2200", emoji: "🔥" },
+    { name: "Todas", value: "All", description: `${products.length} designs · Todas as coleções`, color: "#cc2200", emoji: "🔥" },
     { name: "Metal & Rock", value: "Metal & Rock", description: "19 designs · Heavy metal, gothic, doom", color: "#cc2200", emoji: "🤘" },
     { name: "Surf & Skate", value: "Surf & Skate", description: "10 designs · California vibes", color: "#00897B", emoji: "🏄" },
     { name: "Americana", value: "Americana", description: "10 designs · Route 66, muscle cars", color: "#8B4513", emoji: "🇺🇸" },
     { name: "Sci-Fi & Cult", value: "Sci-Fi & Cult", description: "10 designs · B-movies, space opera, cult cinema", color: "#6a0dad", emoji: "🚀" },
     { name: "Varsity Athletics", value: "Varsity Athletics", description: "10 designs · College sports, boxing, martial arts", color: "#8b0000", emoji: "🏆" },
+    { name: "Motard", value: "Motard", description: "10 designs · Choppers, MC clubs, outlaw riders", color: "#FF6600", emoji: "🏍️" },
   ];
 
   const CollectionsPage = () => (
@@ -347,7 +348,7 @@ export default function LoudinkStore() {
           gap:40,textAlign:"center"}}>
           {[["🖨️","Impressão DTF","Alta qualidade em tecido"],
             ["📦","Envio Portugal","CTT Expresso 2-3 dias"],
-            ["🎨","Design Original","39 designs fictícios únicos"],
+            ["🎨","Design Original",`${products.length} designs fictícios únicos`],
             ["💳","Pagamento MB Way","Rápido e seguro"]].map(([icon,title,sub]) => (
             <div key={title}>
               <div style={{fontSize:28,marginBottom:8}}>{icon}</div>
@@ -581,7 +582,6 @@ export default function LoudinkStore() {
             ))}
           </div>
 
-          {/* Campo de código de desconto */}
           <div style={{marginTop:32,padding:24,background:"#0d0d0d",border:"1px solid #1a1a1a"}}>
             <label style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,
               letterSpacing:2,color:"#555",textTransform:"uppercase",display:"block",marginBottom:12}}>
@@ -630,7 +630,6 @@ export default function LoudinkStore() {
             </div>
           ))}
 
-          {/* Resumo de desconto */}
           <div style={{padding:"16px 0",borderBottom:"1px solid #1a1a1a"}}>
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:8,
               fontFamily:"'Barlow Condensed',sans-serif"}}>
